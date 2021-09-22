@@ -5,7 +5,7 @@ import (
 	"log"
 	"reflect"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func TelegramBot() {
@@ -23,7 +23,7 @@ func TelegramBot() {
 	state := 0
 	answers := Answer{}
 
-	updates := bot.GetUpdatesChan(u)
+	updates, _ := bot.GetUpdatesChan(u)
 	for {
 		for update := range updates {
 			if update.Message == nil {

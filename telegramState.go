@@ -1,6 +1,6 @@
 package main
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 func GetKeyboard(k int) tgbotapi.ReplyKeyboardMarkup {
 
@@ -12,7 +12,7 @@ func GetKeyboard(k int) tgbotapi.ReplyKeyboardMarkup {
 				//tgbotapi.NewKeyboardButton("Электричка"),
 			),
 		),
-		1: tgbotapi.NewOneTimeReplyKeyboard(
+		1: tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("В сторону Калининграда"),
 				tgbotapi.NewKeyboardButton("Из Калининграда"),
@@ -21,7 +21,7 @@ func GetKeyboard(k int) tgbotapi.ReplyKeyboardMarkup {
 				tgbotapi.NewKeyboardButton("Назад"),
 			),
 		),
-		2: tgbotapi.NewOneTimeReplyKeyboard(
+		2: tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
 				tgbotapi.NewKeyboardButton("Назад"),
 			),
