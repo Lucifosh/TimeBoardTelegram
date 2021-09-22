@@ -22,19 +22,19 @@ func TelegramBot() {
 
 	state := 0
 	answers := Answer{}
-	for {
-		updates := bot.GetUpdatesChan(u)
 
-		for update := range updates {
-			if update.Message == nil {
-				continue
-			}
-			if reflect.TypeOf(update.Message.Text).Kind() == reflect.String && update.Message.Text != "" {
-				text := update.Message.Text
-				msg := Say(&state, text, update.Message.Chat.ID, &answers)
-				bot.Send(msg)
-				fmt.Printf("%v %v %v\n%v\n%v\n", answers.Transport, answers.Direction, answers.searchBy, answers.Links, answers.Needs)
-			}
+	updates := bot.GetUpdatesChan(u)
+
+	for update := range updates {
+		if update.Message == nil {
+			continue
+		}
+		if reflect.TypeOf(update.Message.Text).Kind() == reflect.String && update.Message.Text != "" {
+			text := update.Message.Text
+			msg := Say(&state, text, update.Message.Chat.ID, &answers)
+			bot.Send(msg)
+			fmt.Printf("%v %v %v\n%v\n%v\n", answers.Transport, answers.Direction, answers.searchBy, answers.Links, answers.Needs)
 		}
 	}
+
 }
