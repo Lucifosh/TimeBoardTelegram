@@ -105,12 +105,16 @@ func ParseUrl(url string) map[string]Board {
 					ss = ""
 					for idx, v := range s {
 						if v == '*' {
-							if idx-1 >= 0 && s[idx-1] == '*' {
-								continue
+							if s[idx+1] == '*' {
+								ss += "\n" + string(v)
+							} else if idx-1 >= 0 && s[idx-1] != '*' || idx == 0 {
+								ss += "\n" + string(v)
+							} else {
+								ss += string(v)
 							}
-							ss += "\n" + string(v)
+						} else {
+							ss += string(v)
 						}
-						ss += string(v)
 					}
 					s = ss
 					ss = ""
@@ -122,6 +126,7 @@ func ParseUrl(url string) map[string]Board {
 					} else {
 						b.AdditionalInformation += s + "\n"
 					}
+
 					state = "DepAtKgd"
 					space = false
 				}

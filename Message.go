@@ -16,6 +16,32 @@ type Answer struct {
 	Needs     []string //Города или номера транспорта
 }
 
+func Star(max, length int) string {
+	s := ""
+	if max-length == 2 {
+		return "<>"
+	} else if max-length < 2 {
+		return ""
+	}
+	for i := 0; i < max-length; i++ {
+		if i == 0 {
+			s += "<"
+		} else if i == max-length-1 {
+			s += ">"
+		} else {
+			s += "-"
+		}
+	}
+	return s
+}
+func SearchMaxLength(s []string, max *int) {
+	for _, v := range s {
+		if len(v) > *max {
+			*max = len(v)
+		}
+	}
+}
+
 func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConfig {
 	msg := tgbotapi.NewMessage(id, "")
 	if text == "Назад" {
@@ -36,7 +62,7 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 			msg.ReplyMarkup = GetKeyboard(*state)
 		}
 	} else if *state == 1 { // выбор направления
-		if text == "В сторону Калининграда" {
+		if text == "В Калининграда" {
 			msg = tgbotapi.NewMessage(id, "Укажите, откуда едет транспорт или номер транспорта")
 			*state++
 			msg.ReplyMarkup = GetKeyboard(*state)
@@ -72,7 +98,11 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 				message := ""
 				for bus, t := range Buss {
 					b := strings.Split(bus, " ")[0]
-					message += fmt.Sprintf("%v. %v\n%v\n", k, b, t.AdditionalInformation)
+					index := strings.Index(t.AdditionalInformation, "*")
+					if index == -1 {
+						index = len(t.AdditionalInformation)
+					}
+					message += fmt.Sprintf("%v. %v\n%v\n", k, b, t.AdditionalInformation[:index])
 					k++
 				}
 				message += "\nУкажите цифру"
@@ -125,6 +155,7 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 		}
 	} else if *state == 3 { // вывод расписания
 		n := 0
+		max := 20
 		var err error = nil
 		if len(answer.Needs) == 1 {
 			n = 1
@@ -136,7 +167,6 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 			msg = tgbotapi.NewMessage(id, "Неправильный формат. Попробуйте повторить")
 		} else {
 			n--
-			fmt.Printf("***\n%v is correct\n***\n", text)
 			if answer.Transport == "а" { //автобус
 				if answer.searchBy == "н" { // поиск по номеру
 					if len(answer.Needs) <= n || n < 0 {
@@ -154,11 +184,13 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 								message += "Рейс №" + checkBus[0] + "\n"
 							}
 						}
+						SearchMaxLength(p[answer.Needs[n]].DepartureTimeAtStation, &max)
 						message += p[answer.Needs[n]].AdditionalInformation + "\n"
+						message += "Отправление " + Star(max, len("Отправление")) + " Прибытие\n"
 						if answer.Direction == "в" { // в город
 							l := len(p[answer.Needs[n]].DepartureTimeAtStation)
 							for i := 0; i < l; i++ {
-								message += p[answer.Needs[n]].DepartureTimeAtStation[i] + "\t\t"
+								message += p[answer.Needs[n]].DepartureTimeAtStation[i] + " " + Star(max, len(p[answer.Needs[n]].DepartureTimeAtStation[i])) + " "
 								message += p[answer.Needs[n]].ArrivalTimeFromDestination[i] + "\n"
 							}
 							message += "\n"
@@ -167,7 +199,7 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 						} else if answer.Direction == "и" { //из города
 							l := len(p[answer.Needs[n]].DepartureTimeFromStation)
 							for i := 0; i < l; i++ {
-								message += p[answer.Needs[n]].DepartureTimeFromStation[i] + "\t\t"
+								message += p[answer.Needs[n]].DepartureTimeFromStation[i] + " " + Star(max, len(p[answer.Needs[n]].DepartureTimeAtStation[i])) + " "
 								message += p[answer.Needs[n]].ArrivalTimeAtDestination[i] + "\n"
 							}
 							message += "\n"
@@ -185,6 +217,9 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 						p := ParseUrl(answer.Links[n])
 
 						if answer.Direction == "в" { // в город
+							for _, time := range p {
+								SearchMaxLength(time.DepartureTimeAtStation, &max)
+							}
 							for bus, time := range p {
 								checkBus := strings.Split(bus, " ")
 								if len(checkBus) == 1 {
@@ -197,17 +232,21 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 									}
 								}
 								message += time.AdditionalInformation + "\n"
+								message += "Отправление " + Star(max, len("Отправление")) + " Прибытие\n"
 								l := len(time.DepartureTimeAtStation)
 								for i := 0; i < l; i++ {
-									message += time.DepartureTimeAtStation[i] + "\t\t"
+									message += time.DepartureTimeAtStation[i] + " " + Star(max, len(time.DepartureTimeAtStation[i])) + " "
 									message += time.ArrivalTimeFromDestination[i] + "\n"
 								}
-								message += "\n\n"
+								message += "\n"
 								msg = tgbotapi.NewMessage(id, message)
 								*state = 0
 								msg.ReplyMarkup = GetKeyboard(*state)
 							}
 						} else if answer.Direction == "и" { // из города
+							for _, time := range p {
+								SearchMaxLength(time.DepartureTimeFromStation, &max)
+							}
 							for bus, time := range p {
 								checkBus := strings.Split(bus, " ")
 								if len(checkBus) == 1 {
@@ -220,16 +259,18 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 									}
 								}
 								message += time.AdditionalInformation + "\n"
+								message += "Отправление " + Star(max, len("Отправление")) + " Прибытие\n"
 								l := len(time.DepartureTimeFromStation)
 								for i := 0; i < l; i++ {
-									message += time.DepartureTimeFromStation[i] + "\t\t"
+									message += time.DepartureTimeFromStation[i] + " " + Star(max, len(time.DepartureTimeFromStation[i])) + " "
 									message += time.ArrivalTimeAtDestination[i] + "\n"
 								}
-								message += "\n\n"
-								msg = tgbotapi.NewMessage(id, message)
-								*state = 0
-								msg.ReplyMarkup = GetKeyboard(*state)
+								message += "\n"
+
 							}
+							msg = tgbotapi.NewMessage(id, message)
+							*state = 0
+							msg.ReplyMarkup = GetKeyboard(*state)
 						}
 					}
 				}

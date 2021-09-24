@@ -14,7 +14,7 @@ func GetKeyboard(k int) tgbotapi.ReplyKeyboardMarkup {
 		),
 		1: tgbotapi.NewReplyKeyboard(
 			tgbotapi.NewKeyboardButtonRow(
-				tgbotapi.NewKeyboardButton("В сторону Калининграда"),
+				tgbotapi.NewKeyboardButton("В Калининграда"),
 				tgbotapi.NewKeyboardButton("Из Калининграда"),
 			),
 			tgbotapi.NewKeyboardButtonRow(

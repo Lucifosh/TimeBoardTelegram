@@ -9,7 +9,7 @@ import (
 )
 
 func TelegramBot() {
-	bot, err := tgbotapi.NewBotAPI(GetToken())
+	bot, err := tgbotapi.NewBotAPI(getToken())
 	if err != nil {
 		log.Panic(err)
 	}
