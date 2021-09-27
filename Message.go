@@ -77,7 +77,7 @@ func Say(state *int, text string, id int64, answer *Answer) tgbotapi.MessageConf
 			msg.ReplyMarkup = GetKeyboard(*state)
 		}
 	} else if *state == 2 { // поиск города или номера
-		m := addMap()
+		m := GetData()
 		if IsNumber(text) { // поиск по номеру
 			Buss, urls := SearchBus(m, text)
 			if len(Buss) == 0 {
